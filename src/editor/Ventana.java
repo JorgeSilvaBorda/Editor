@@ -1,7 +1,6 @@
 package editor;
 
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -512,6 +511,7 @@ public final class Ventana extends javax.swing.JFrame {
                 
             }
         };
+        men.addActionListener(ac);
         menu.add(men);
     }
 }
