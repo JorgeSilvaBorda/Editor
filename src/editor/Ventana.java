@@ -1,6 +1,9 @@
 package editor;
 
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.URL;
 import java.util.Calendar;
@@ -35,12 +38,17 @@ public final class Ventana extends javax.swing.JFrame {
         iniciarTexto();
         iniciarLog();
         log.info("Sistema iniciado.");
+        String so = System.getProperty("os.name");
+        log.info("El sistema operativo es: " + so);
+        log.info("El usuario utilizando es: " + System.getProperty("user.name"));
         log.info("El lenguaje por defecto es : Java.");
         Lector l = new Lector();
         //Acá se puede obtener la configuración en caso de exixtir...
         //config = l.leerConfig("src/Editor/config/config.cfg");
         FileTree arbol = new FileTree(new File("."));
         panelDerecho.add("Listado", arbol);
+        salida.setAutoscrolls(true);
+        agregarPopUpTabla();
     }
 
     /**
@@ -287,7 +295,6 @@ public final class Ventana extends javax.swing.JFrame {
     public void iniciarLog() {
         //Inicia la tabla en el comienzo del programa
         salida.setAutoscrolls(true);
-        //salidas.setLayout(new BorderLayout());
         JScrollPane scroll = new JScrollPane(salida);
         scroll.setViewportView(salida);
         MiModeloTabla modelo = new MiModeloTabla();
@@ -311,7 +318,6 @@ public final class Ventana extends javax.swing.JFrame {
 
     public void iniciarTexto() {
         //Inicia el panel de texto...
-        //RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
@@ -429,7 +435,7 @@ public final class Ventana extends javax.swing.JFrame {
 
     public void ejecutarComando(String comando) {
         //String so = System.getProperty("os.name");
-        String s = "";
+        String s;
         try {
             Process p = Runtime.getRuntime().exec(comando);
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -444,28 +450,68 @@ public final class Ventana extends javax.swing.JFrame {
             Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     public void log(String tipo, String mensaje) {
-        if(tipo.equals("error")){
+        //Para llamar a los log de ventana a través de la clase principal (Editor)
+        if (tipo.equals("error")) {
             log.error(mensaje);
-        }else if(tipo.equals("info")){
+        } else if (tipo.equals("info")) {
             log.info(mensaje);
-        }else if(tipo.equals("advertencia")){
+        } else if (tipo.equals("advertencia")) {
             log.advertencia(mensaje);
         }
-        /*
-            Calendar Cal = Calendar.getInstance();
-            String fec = Cal.get(Calendar.DATE) + "/"
-                    + (Cal.get(Calendar.MONTH) + 1) + "/"
-                    + Cal.get(Calendar.YEAR) + " "
-                    + Cal.get(Calendar.HOUR_OF_DAY) + ":"
-                    + Cal.get(Calendar.MINUTE) + ":"
-                    + Cal.get(Calendar.SECOND);
-            SimpleAttributeSet attrs = new SimpleAttributeSet();
-            StyleConstants.setBold(attrs, true);
-            java.awt.Font fuente = new java.awt.Font("Arial", Font.BOLD, 10);
-            MiModeloTabla modelo = (MiModeloTabla) salida.getModel();
-            Object[] data = {createImage("img/info.png"), fec, mensaje};
-            modelo.addRow(data);
-                */
-        }
+    }
+
+    public boolean limpiarSalida() {
+        DefaultTableModel m = (DefaultTableModel) salida.getModel();
+        m.setRowCount(0);
+        salida.setModel(m);
+        return true;
+    }
+
+    public void agregarPopUpTabla() {
+        JPopupMenu menu = new JPopupMenu();
+        
+        //Menu item para poder limpiar toda la salida de la tabla.
+        JMenuItem men = new JMenuItem("Limpiar Salida");
+        ActionListener ac = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                limpiarSalida();
+            }
+        };
+        men.addActionListener(ac);
+        menu.add(men);
+        
+        //Menu item para seleccionar toda la tabla.
+        men = new JMenuItem("Seleccionar todo");
+        ac = new ActionListener() {
+            DefaultTableModel mod = (DefaultTableModel) salida.getModel();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (salida.getRowCount() >= 1) {
+                    for (int i = 0; i < salida.getRowCount(); i++) {
+                        //Acá seleccionar todo......
+                        salida.clearSelection();
+                        salida.changeSelection(0, 2, false, false);
+                        salida.changeSelection(salida.getRowCount() - 1, 2, false, true);
+                    }
+                }
+            }
+        };
+        men.addActionListener(ac);
+        menu.add(men);
+        salida.setComponentPopupMenu(menu);
+        
+        men = new JMenuItem("Copiar al portapapeles");
+        ac = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        };
+        menu.add(men);
+    }
 }
