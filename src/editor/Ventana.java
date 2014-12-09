@@ -1,8 +1,11 @@
 package editor;
 
 import java.awt.*;
-import java.io.File;
+import java.io.*;
+import java.net.URL;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.SimpleAttributeSet;
@@ -12,51 +15,32 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
- *
- * @author jasilvab
+ * @author Jorge Silva Borda
  */
-public class Ventana extends javax.swing.JFrame {
+public final class Ventana extends javax.swing.JFrame {
+
+    Configuracion config = new Configuracion();
+    public static String rutaSeleccionada;
+    public Log log = new Log();
     RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
-    JTable salida = new JTable();
-    String lenguaje = "";
-    public static String rutaSeleccionada = "";
+    MiModeloTabla m = new MiModeloTabla();
+    JTable salida = new JTable(m);
+
     /**
      * Creates new form Ventana
      */
     public Ventana() {
-        initComponents();/*
-        JPanel cp = new JPanel(new BorderLayout());*/
-        //RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-        textArea.setCodeFoldingEnabled(true);
-        RTextScrollPane sp = new RTextScrollPane(textArea);
-        panelIzquierdo.add(sp);
-        
-        //setContentPane(cp);
-        //setTitle("Text Editor Demo");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        pack();
-        setLocationRelativeTo(null);
-        
-        salida.setAutoscrolls(true);
-        //salidas.setLayout(new BorderLayout());
-        JScrollPane scroll = new JScrollPane(salida);
-        scroll.setViewportView(salida);
-        DefaultTableModel modelo = new DefaultTableModel();
-        
-        modelo.addColumn("Hora");
-        modelo.addColumn("Mensaje");
-        salida.setModel(modelo);
-        salida.getColumn("Hora").setWidth(120);
-        salida.getColumn("Hora").setMaxWidth(120);
-        salida.getColumn("Hora").setPreferredWidth(120);
-        salida.setGridColor(Color.WHITE);
-        panelFondo.add(scroll);
-        splitHor.setDividerLocation(0.90);
-        splitVer.setDividerLocation(0.90);
-        //Se manda a abrir el mostrador de rutas de archivo
+        initComponents();
+
+        iniciarTexto();
+        iniciarLog();
+        log.info("Sistema iniciado.");
+        log.info("El lenguaje por defecto es : Java.");
+        Lector l = new Lector();
+        //Acá se puede obtener la configuración en caso de exixtir...
+        //config = l.leerConfig("src/Editor/config/config.cfg");
         FileTree arbol = new FileTree(new File("."));
-        pestanas.add("Listado", arbol);
+        panelDerecho.add("Listado", arbol);
     }
 
     /**
@@ -72,8 +56,7 @@ public class Ventana extends javax.swing.JFrame {
         splitHor = new javax.swing.JSplitPane();
         splitVer = new javax.swing.JSplitPane();
         panelIzquierdo = new javax.swing.JPanel();
-        panelDerecho = new javax.swing.JPanel();
-        pestanas = new javax.swing.JTabbedPane();
+        panelDerecho = new javax.swing.JTabbedPane();
         panelFondo = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -84,6 +67,11 @@ public class Ventana extends javax.swing.JFrame {
         btnPhp = new javax.swing.JMenuItem();
         btnJavascript = new javax.swing.JMenuItem();
         btnHtml = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        jMenu6 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenu7 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 600));
@@ -103,13 +91,6 @@ public class Ventana extends javax.swing.JFrame {
         panelIzquierdo.setMinimumSize(new java.awt.Dimension(800, 400));
         panelIzquierdo.setLayout(new javax.swing.BoxLayout(panelIzquierdo, javax.swing.BoxLayout.LINE_AXIS));
         splitVer.setLeftComponent(panelIzquierdo);
-
-        panelDerecho.setMaximumSize(new java.awt.Dimension(200, 2147483647));
-        panelDerecho.setMinimumSize(new java.awt.Dimension(100, 0));
-        panelDerecho.setPreferredSize(new java.awt.Dimension(200, 2147483647));
-        panelDerecho.setLayout(new java.awt.BorderLayout());
-        panelDerecho.add(pestanas, java.awt.BorderLayout.CENTER);
-
         splitVer.setRightComponent(panelDerecho);
 
         splitHor.setTopComponent(splitVer);
@@ -172,6 +153,29 @@ public class Ventana extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu2);
 
+        jMenu4.setText("Configuración");
+
+        jMenu6.setText("SQL");
+
+        jMenuItem2.setText("Servidor SQL");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu6.add(jMenuItem2);
+
+        jMenu4.add(jMenu6);
+
+        jMenu7.setText("PHP");
+
+        jMenuItem3.setText("Servicio PHP");
+        jMenu7.add(jMenuItem3);
+
+        jMenu4.add(jMenu7);
+
+        jMenuBar1.add(jMenu4);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -189,38 +193,38 @@ public class Ventana extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
-        
+
     }//GEN-LAST:event_formWindowStateChanged
 
     private void btnSqlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSqlActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SQL);
-        this.lenguaje = "SQL";
-        log("Lenguaje cambiado a SQL.");
+        log.info("Lenguaje cambiado a SQL.");
     }//GEN-LAST:event_btnSqlActionPerformed
 
     private void btnJavaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJavaActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-        this.lenguaje = "Java";
-        log("Lenguaje cambiado a Java.");
+        log.info("Lenguaje cambiado a Java.");
     }//GEN-LAST:event_btnJavaActionPerformed
 
     private void btnPhpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPhpActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PHP);
-        this.lenguaje = "PHP";
-        log("Lenguaje cambiado a PHP.");
+        log.info("Lenguaje cambiado a PHP.");
     }//GEN-LAST:event_btnPhpActionPerformed
 
     private void btnJavascriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJavascriptActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-        this.lenguaje = "JavaScript";
-        log("Lenguaje cambiado a JavaScript.");
+        log.info("Lenguaje cambiado a JavaScript.");
     }//GEN-LAST:event_btnJavascriptActionPerformed
 
     private void btnHtmlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHtmlActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-        this.lenguaje = "HTML";
-        log("Lenguaje cambiado a HTML.");
+        log.info("Lenguaje cambiado a HTML.");
     }//GEN-LAST:event_btnHtmlActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        ConfigSql config = new ConfigSql();
+        config.setVisible(true);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -267,45 +271,201 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu6;
+    private javax.swing.JMenu jMenu7;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel panelDerecho;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JTabbedPane panelDerecho;
     private javax.swing.JPanel panelFondo;
     private javax.swing.JPanel panelIzquierdo;
-    private javax.swing.JTabbedPane pestanas;
     private javax.swing.JSplitPane splitHor;
     private javax.swing.JSplitPane splitVer;
     // End of variables declaration//GEN-END:variables
-    
-    public void log(String mensaje){
-        Calendar Cal= Calendar.getInstance(); 
-        String fec= Cal.get(Cal.DATE)+"/"
-                +(Cal.get(Cal.MONTH)+1)+"/"
-                +Cal.get(Cal.YEAR)+" "
-                +Cal.get(Cal.HOUR_OF_DAY)+":"
-                +Cal.get(Cal.MINUTE)+":"
-                +Cal.get(Cal.SECOND); 
-        SimpleAttributeSet attrs = new SimpleAttributeSet();
-        StyleConstants.setBold(attrs, true);
-        java.awt.Font MyFont = new java.awt.Font ("Arial", Font.BOLD, 10);
-        DefaultTableModel modelo = (DefaultTableModel) salida.getModel();
-        JLabel l = new JLabel();
-        l.setText(fec);
-        l.setFont(MyFont);
-        Object[] data = {fec, mensaje};
-        modelo.addRow(data);   
+
+    public void iniciarLog() {
+        //Inicia la tabla en el comienzo del programa
+        salida.setAutoscrolls(true);
+        //salidas.setLayout(new BorderLayout());
+        JScrollPane scroll = new JScrollPane(salida);
+        scroll.setViewportView(salida);
+        MiModeloTabla modelo = new MiModeloTabla();
+        modelo.addColumn("TIPO");
+        modelo.addColumn("HORA");
+        modelo.addColumn("MENSAJE");
+        salida.setModel(modelo);
+
+        salida.getColumn("TIPO").setWidth(40);
+        salida.getColumn("TIPO").setMaxWidth(40);
+        salida.getColumn("TIPO").setPreferredWidth(40);
+
+        salida.getColumn("HORA").setWidth(120);
+        salida.getColumn("HORA").setMaxWidth(120);
+        salida.getColumn("HORA").setPreferredWidth(120);
+        salida.setGridColor(Color.WHITE);
+        panelFondo.add(scroll);
+        Log l = new Log();
+        l.info("Codificación iniciada.");
     }
-    public void ejecutar(){
-        switch (this.lenguaje){
-            case "SQL":
-                break;
-            case "Java":
-                break;
-            case "JavaScript":
-                break;
-            case "PHP":
-                break;
-            case "HTML":
-                break;
+
+    public void iniciarTexto() {
+        //Inicia el panel de texto...
+        //RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+        textArea.setCodeFoldingEnabled(true);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        panelIzquierdo.add(sp);
+        textArea.setTabSize(4);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        Log l = new Log();
+        l.info("Se inicia el gestor de texto.");
+    }
+
+    //Para poder mostrar la imagen en la tabla
+    public ImageIcon createImage(String path) {
+        URL imgURL = getClass().getResource(path);
+        if (imgURL != null) {
+            return new ImageIcon(imgURL);
+        } else {
+            System.err.println("Couldn't find file: " + path);
+            return null;
         }
     }
+
+    public Class<?> getColumnClass(int columnIndex) {
+        return Object.class;
+    }
+
+    private class MiModeloTabla extends DefaultTableModel {
+
+        public MiModeloTabla(Object[] data) {
+            super();
+        }
+
+        public MiModeloTabla() {
+            super();
+        }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            Class<?> clazz = Object.class;
+            Object aux = getValueAt(0, columnIndex);
+            if (aux != null) {
+                clazz = aux.getClass();
+            }
+            return clazz;
+        }
+    }
+
+    //Clase que logea todo en la tabla...
+    class Log {
+
+        //Metoodo Error. Pone el icono de error.
+        void error(String mensaje) {
+            Calendar Cal = Calendar.getInstance();
+            String fec = Cal.get(Calendar.DATE) + "/"
+                    + (Cal.get(Calendar.MONTH) + 1) + "/"
+                    + Cal.get(Calendar.YEAR) + " "
+                    + Cal.get(Calendar.HOUR_OF_DAY) + ":"
+                    + Cal.get(Calendar.MINUTE) + ":"
+                    + Cal.get(Calendar.SECOND);
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setBold(attrs, true);
+            java.awt.Font fuente = new java.awt.Font("Arial", Font.BOLD, 10);
+            MiModeloTabla modelo = (MiModeloTabla) salida.getModel();
+            Object[] data = {createImage("img/error.png"), fec, mensaje};
+            modelo.addRow(data);
+        }
+
+        //Metoodo Info. Pone el icono de info.
+        void info(String mensaje) {
+            Calendar Cal = Calendar.getInstance();
+            String fec = Cal.get(Calendar.DATE) + "/"
+                    + (Cal.get(Calendar.MONTH) + 1) + "/"
+                    + Cal.get(Calendar.YEAR) + " "
+                    + Cal.get(Calendar.HOUR_OF_DAY) + ":"
+                    + Cal.get(Calendar.MINUTE) + ":"
+                    + Cal.get(Calendar.SECOND);
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setBold(attrs, true);
+            java.awt.Font fuente = new java.awt.Font("Arial", Font.BOLD, 10);
+            MiModeloTabla modelo = (MiModeloTabla) salida.getModel();
+            Object[] data = {createImage("img/info.png"), fec, mensaje};
+            modelo.addRow(data);
+        }
+
+        //Metoodo Advertencia. Pone el icono de advertencia.
+        void advertencia(String mensaje) {
+            Calendar Cal = Calendar.getInstance();
+            String fec = Cal.get(Calendar.DATE) + "/"
+                    + (Cal.get(Calendar.MONTH) + 1) + "/"
+                    + Cal.get(Calendar.YEAR) + " "
+                    + Cal.get(Calendar.HOUR_OF_DAY) + ":"
+                    + Cal.get(Calendar.MINUTE) + ":"
+                    + Cal.get(Calendar.SECOND);
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setBold(attrs, true);
+            java.awt.Font fuente = new java.awt.Font("Arial", Font.BOLD, 10);
+            MiModeloTabla modelo = (MiModeloTabla) salida.getModel();
+            Object[] data = {createImage("img/advertencia.png"), fec, mensaje};
+            modelo.addRow(data);
+        }
+    }
+
+    public void guardarConfigSql() {
+        Object[] parametros = {"RUTA", "SERVIDOR", "USUARIO", "CLAVE", "OTROS"};
+
+        Configuracion c = new Configuracion("SQL", parametros);
+        Escritor e = new Escritor();
+        Object[] resp = e.escribirConfig(c, "src/Editor/config/config.cfg");
+        if ((boolean) resp[0] == false) {
+            log.error((String) resp[1]);
+        } else {
+            log.info((String) resp[1]);
+        }
+    }
+
+    public void ejecutarComando(String comando) {
+        //String so = System.getProperty("os.name");
+        String s = "";
+        try {
+            Process p = Runtime.getRuntime().exec(comando);
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            while ((s = stdInput.readLine()) != null) {
+                log.info(s);
+            }
+            while ((s = stdError.readLine()) != null) {
+                log.error(s);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void log(String tipo, String mensaje) {
+        if(tipo.equals("error")){
+            log.error(mensaje);
+        }else if(tipo.equals("info")){
+            log.info(mensaje);
+        }else if(tipo.equals("advertencia")){
+            log.advertencia(mensaje);
+        }
+        /*
+            Calendar Cal = Calendar.getInstance();
+            String fec = Cal.get(Calendar.DATE) + "/"
+                    + (Cal.get(Calendar.MONTH) + 1) + "/"
+                    + Cal.get(Calendar.YEAR) + " "
+                    + Cal.get(Calendar.HOUR_OF_DAY) + ":"
+                    + Cal.get(Calendar.MINUTE) + ":"
+                    + Cal.get(Calendar.SECOND);
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setBold(attrs, true);
+            java.awt.Font fuente = new java.awt.Font("Arial", Font.BOLD, 10);
+            MiModeloTabla modelo = (MiModeloTabla) salida.getModel();
+            Object[] data = {createImage("img/info.png"), fec, mensaje};
+            modelo.addRow(data);
+                */
+        }
 }
