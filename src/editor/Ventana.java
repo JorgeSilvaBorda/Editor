@@ -1,6 +1,7 @@
 package editor;
 
 import java.awt.*;
+import java.io.File;
 import java.util.Calendar;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -18,6 +19,7 @@ public class Ventana extends javax.swing.JFrame {
     RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
     JTable salida = new JTable();
     String lenguaje = "";
+    public static String rutaSeleccionada = "";
     /**
      * Creates new form Ventana
      */
@@ -52,6 +54,9 @@ public class Ventana extends javax.swing.JFrame {
         panelFondo.add(scroll);
         splitHor.setDividerLocation(0.90);
         splitVer.setDividerLocation(0.90);
+        //Se manda a abrir el mostrador de rutas de archivo
+        FileTree arbol = new FileTree(new File("."));
+        pestanas.add("Listado", arbol);
     }
 
     /**
@@ -68,6 +73,7 @@ public class Ventana extends javax.swing.JFrame {
         splitVer = new javax.swing.JSplitPane();
         panelIzquierdo = new javax.swing.JPanel();
         panelDerecho = new javax.swing.JPanel();
+        pestanas = new javax.swing.JTabbedPane();
         panelFondo = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -102,6 +108,8 @@ public class Ventana extends javax.swing.JFrame {
         panelDerecho.setMinimumSize(new java.awt.Dimension(100, 0));
         panelDerecho.setPreferredSize(new java.awt.Dimension(200, 2147483647));
         panelDerecho.setLayout(new java.awt.BorderLayout());
+        panelDerecho.add(pestanas, java.awt.BorderLayout.CENTER);
+
         splitVer.setRightComponent(panelDerecho);
 
         splitHor.setTopComponent(splitVer);
@@ -263,6 +271,7 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JPanel panelDerecho;
     private javax.swing.JPanel panelFondo;
     private javax.swing.JPanel panelIzquierdo;
+    private javax.swing.JTabbedPane pestanas;
     private javax.swing.JSplitPane splitHor;
     private javax.swing.JSplitPane splitVer;
     // End of variables declaration//GEN-END:variables
