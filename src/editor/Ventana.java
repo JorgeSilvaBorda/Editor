@@ -17,6 +17,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 public class Ventana extends javax.swing.JFrame {
     RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
     JTable salida = new JTable();
+    String lenguaje = "";
     /**
      * Creates new form Ventana
      */
@@ -185,26 +186,31 @@ public class Ventana extends javax.swing.JFrame {
 
     private void btnSqlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSqlActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SQL);
+        this.lenguaje = "SQL";
         log("Lenguaje cambiado a SQL.");
     }//GEN-LAST:event_btnSqlActionPerformed
 
     private void btnJavaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJavaActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+        this.lenguaje = "Java";
         log("Lenguaje cambiado a Java.");
     }//GEN-LAST:event_btnJavaActionPerformed
 
     private void btnPhpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPhpActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PHP);
+        this.lenguaje = "PHP";
         log("Lenguaje cambiado a PHP.");
     }//GEN-LAST:event_btnPhpActionPerformed
 
     private void btnJavascriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJavascriptActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        this.lenguaje = "JavaScript";
         log("Lenguaje cambiado a JavaScript.");
     }//GEN-LAST:event_btnJavascriptActionPerformed
 
     private void btnHtmlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHtmlActionPerformed
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
+        this.lenguaje = "HTML";
         log("Lenguaje cambiado a HTML.");
     }//GEN-LAST:event_btnHtmlActionPerformed
 
@@ -278,5 +284,19 @@ public class Ventana extends javax.swing.JFrame {
         l.setFont(MyFont);
         Object[] data = {fec, mensaje};
         modelo.addRow(data);   
+    }
+    public void ejecutar(){
+        switch (this.lenguaje){
+            case "SQL":
+                break;
+            case "Java":
+                break;
+            case "JavaScript":
+                break;
+            case "PHP":
+                break;
+            case "HTML":
+                break;
+        }
     }
 }
